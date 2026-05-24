@@ -183,15 +183,3 @@ xcodebuild -project Termside.xcodeproj -scheme Termside -destination 'platform=m
 xcodebuild -project Termside.xcodeproj -scheme Termside -configuration Release -destination 'platform=macOS' clean build
 codesign --verify --deep --strict --verbose=2 <path-to-release-Termside.app>
 ```
-
-## Public Fork Notes
-
-This fork can be public, but every release should preserve clear provenance:
-
-- Keep upstream license files intact.
-- Do not remove notices from Ghostty, libghostty-spm, or bundled third-party code.
-- State in release notes when an artifact is repacked from an upstream binary rather than rebuilt from source.
-- Do not publish private signing identities, credentials, or local paths in release notes or scripts.
-- Keep the binary artifact source URL and checksum reproducible in release notes when practical.
-
-The fork currently publishes the same wrapper source with a packaging fix for the macOS binary framework layout.
