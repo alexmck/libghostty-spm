@@ -59,13 +59,39 @@ stage_framework() {
     platform=$(plist_platform_for_variant "$variant")
 
     rm -rf "$framework_path"
-    mkdir -p "$headers_dir" "$modules_dir"
-    cp "$library_path" "$framework_path/$FRAMEWORK_NAME"
-    cp -R "$header_dir/." "$headers_dir/"
-    mv "$headers_dir/module.modulemap" "$modules_dir/module.modulemap"
-    sed -i '' "1s/^module $FRAMEWORK_NAME/framework module $FRAMEWORK_NAME/" "$modules_dir/module.modulemap"
+    if [ "$variant" = "macosx" ]; then
+        headers_dir="$framework_path/Versions/A/Headers"
+        modules_dir="$framework_path/Versions/A/Modules"
+        mkdir -p "$headers_dir" "$modules_dir" "$framework_path/Versions/A/Resources"
+        cp "$library_path" "$framework_path/Versions/A/$FRAMEWORK_NAME"
+        cp -R "$header_dir/." "$headers_dir/"
+        mv "$headers_dir/module.modulemap" "$modules_dir/module.modulemap"
+        sed -i '' "1s/^module $FRAMEWORK_NAME/framework module $FRAMEWORK_NAME/" "$modules_dir/module.modulemap"
 
-    cat >"$framework_path/Info.plist" <<EOF
+        write_info_plist "$framework_path/Versions/A/Resources/Info.plist" "$platform"
+        ln -s "A" "$framework_path/Versions/Current"
+        ln -s "Versions/Current/$FRAMEWORK_NAME" "$framework_path/$FRAMEWORK_NAME"
+        ln -s "Versions/Current/Headers" "$framework_path/Headers"
+        ln -s "Versions/Current/Modules" "$framework_path/Modules"
+        ln -s "Versions/Current/Resources" "$framework_path/Resources"
+    else
+        mkdir -p "$headers_dir" "$modules_dir"
+        cp "$library_path" "$framework_path/$FRAMEWORK_NAME"
+        cp -R "$header_dir/." "$headers_dir/"
+        mv "$headers_dir/module.modulemap" "$modules_dir/module.modulemap"
+        sed -i '' "1s/^module $FRAMEWORK_NAME/framework module $FRAMEWORK_NAME/" "$modules_dir/module.modulemap"
+
+        write_info_plist "$framework_path/Info.plist" "$platform"
+    fi
+
+    XCFRAMEWORK_COMMAND+=("-framework" "$framework_path")
+}
+
+write_info_plist() {
+    local plist_path="$1"
+    local platform="$2"
+
+    cat >"$plist_path" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -93,8 +119,6 @@ stage_framework() {
 </dict>
 </plist>
 EOF
-
-    XCFRAMEWORK_COMMAND+=("-framework" "$framework_path")
 }
 
 rm -rf "$FRAMEWORK_STAGE_DIR"
