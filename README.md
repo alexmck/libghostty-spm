@@ -4,6 +4,10 @@ Swift Package wrapping [Ghostty](https://ghostty.org)'s terminal emulator librar
 
 > Pre-built `libghostty` static library distributed as an XCFramework binary target.
 
+## Termside Fork
+
+This fork carries a packaging fix for Termside: the macOS `libghostty.framework` slice is emitted as a versioned macOS framework so Xcode app validation can sign and embed it reliably. Upstream source and release maintenance notes live in [docs/fork-maintenance.md](docs/fork-maintenance.md).
+
 ## Platforms
 
 - macOS 13+
